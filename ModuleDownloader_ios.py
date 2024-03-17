@@ -33,7 +33,7 @@ class Process(object):
     def check(self):
         if not os.path.isfile(self.module_info_dir):
             with open(self.module_info_dir, 'wb') as f:
-                f.write('')
+                f.write(''.encode())
         
         if not os.path.isdir(self.module_dir):
             os.makedirs(self.module_dir)
