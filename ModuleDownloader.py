@@ -282,7 +282,7 @@ def checkUpdate():
     script_origin = "https://raw.githubusercontent.com/BlackCCCat/SurgeModuleManager/main/ModuleDownloader.py"
     res = requests.get(url=script_origin, verify=False)
     new_script_content = res.text
-    new_version = re.search(r'#version:(?P<version>\d+)', res.text).group("version")
+    new_version = re.search(r'#\s*version:(?P<version>\d+)', res.text).group("version")
     if new_version > __version__:
         user_ans = input("检查到新版本，是否更新(y/n)? ")
         if user_ans.lower() == 'y':
