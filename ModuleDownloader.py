@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# version:20240317
+
+__version__ = "20240317"
 
 import os
 import sys
@@ -275,18 +278,39 @@ class Process(object):
             return False
 
 
+def checkUpdate():
+    script_origin = "https://raw.githubusercontent.com/BlackCCCat/SurgeModuleManager/main/ModuleDownloader.py"
+    res = requests.get(url=script_origin, verify=False)
+    new_script_content = res.text
+    new_version = re.search('^#version:(?P<version>\d+)', res.text).group("version")
+    if new_version > __version__:
+        user_ans = input("检查到新版本，是否更新？y/n")
+        if user_ans.lower() == 'y':
+            with open(__file__, 'w') as f:
+                f.write(res.text)
+            print('更新完成')
+            return True
+        else:
+            return False
+    else:
+        return False
         
+
 
 
 
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     module_dir = os.path.join(BASE_DIR,'Modules')
-
-    surge = Process(BASE_DIR,module_dir)
-    loop = True
-    while loop:
-        loop = surge.run_process()
+    
+    check_res = checkUpdate()
+    if check_res:
+        print('请重新运行此脚本')
+    else:
+        surge = Process(BASE_DIR,module_dir)
+        loop = True
+        while loop:
+            loop = surge.run_process()
 
 
 if __name__ == "__main__":
