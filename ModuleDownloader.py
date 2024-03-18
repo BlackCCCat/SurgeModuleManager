@@ -4,7 +4,6 @@
 __version__ = "20240317"
 
 import os
-import sys
 import requests
 import re
 import json
@@ -281,18 +280,21 @@ class Process(object):
 def checkUpdate():
     script_origin = "https://raw.githubusercontent.com/BlackCCCat/SurgeModuleManager/main/ModuleDownloader.py"
     res = requests.get(url=script_origin, verify=False)
-    new_script_content = res.text
-    new_version = re.search(r'#\s*version:(?P<version>\d+)', res.text).group("version")
-    if new_version > __version__:
-        user_ans = input("检查到新版本，是否更新(y/n)? ")
-        if user_ans.lower() == 'y':
-            with open(__file__, 'w') as f:
-                f.write(res.text)
-            print('更新完成')
-            return True
+    if res.status_code == 200 and 'text/plain' in res.headers.get('Content-Type'):
+        new_version = re.search(r'#\s*version:(?P<version>\d+)', res.text).group("version")
+        if new_version > __version__:
+            user_ans = input("检查到新版本，是否更新(y/n)? ")
+            if user_ans.lower() == 'y':
+                with open(__file__, 'w') as f:
+                    f.write(res.text)
+                print('更新完成')
+                return True
+            else:
+                return False
         else:
             return False
     else:
+        print('无法获取最新版本')
         return False
         
 
