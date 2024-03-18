@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240317
+# version:20240318
 
-__version__ = "20240317"
+__version__ = "20240318"
 
 import os
 import requests
