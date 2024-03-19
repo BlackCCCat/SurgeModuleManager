@@ -213,7 +213,7 @@ class Process(object):
                 modules_info.update({new_name: modules_info.pop(module_name_l[0])})
             
             self.saveJsonFile(modules_info)
-            print(f'已修改')
+            print(colorText('已修改', 'green'))
             return True
         elif user_cmd == '3':
             modules_info = self.readJsonFile()
