@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-# version:20240318
+# version:20240319
 
-__version__ = "20240318"
+__version__ = "20240319"
 
 import os
 import requests
 import re
 import json
 from threading import Thread
+from colorama import Fore, Style
 
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -45,7 +46,7 @@ class Process(object):
         try:
             modules = json.loads(content)
         except:
-            print('当前无模块信息')
+            print(colorText('当前无模块信息', 'yellow'))
             modules = {}
         return modules
         
@@ -84,7 +85,7 @@ class Process(object):
         while loop:
             input_module_info = input('请输入模块名称和下载链接(以@分割:name@links[@sysinfo])')
             if input_module_info and '@' not in input_module_info:
-                print('格式输入错误')
+                print(colorText('格式输入错误', 'red'))
                 continue
 
             if input_module_info:
@@ -103,15 +104,15 @@ class Process(object):
                         modules_info[add_module_name] = {'link':add_module_link,'system':add_module_sysinfo}
                         count += 1
                     else:
-                        print('当前系统下名称重复')
+                        print(colorText('当前系统下名称重复', 'yellow'))
                 else:
-                    print('链接已存在')
+                    print(colorText('链接已存在', 'yellow'))
             else:
                 loop = False
 
         self.saveJsonFile(modules_info)
 
-        print(f'共添加{count}个模块下载链接')
+        print(colorText(f'共添加{count}个模块下载链接', 'blue'))
 
     # 下载
     def download_module(self,module_name,module_link,system_info):
@@ -141,12 +142,12 @@ class Process(object):
             with open(whole_file_name,'w') as mf:
                 mf.write(res_content)
 
-            print(f'✅ {module_name}(链接为:{module_link}) 已下载')
+            print(colorText(f'✅ {module_name}(链接为:{module_link}) 已下载', 'green'))
             return True
         elif res.status_code == 404:
-            print(f'🈳 {module_name}(链接为:{module_link}) 不存在，请检查GitHub地址是否正确')
+            print(colorText(f'🈳 {module_name}(链接为:{module_link}) 不存在，请检查GitHub地址是否正确', 'yellow'))
         else:
-            print(f'❌ 下载 {module_name}(链接为:{module_link}) 失败')
+            print(colorText(f'❌ 下载 {module_name}(链接为:{module_link}) 失败', 'red'))
             return False
 
 
@@ -169,6 +170,8 @@ class Process(object):
     def show(self, mutiple=True):
         select_menu = {}
         modules_info = self.readJsonFile()
+        if not modules_info:
+            return None, None
         for idx, k in enumerate(modules_info):
             select_menu[f'{idx+1}'] = k
             print(f'{idx+1}. {k}')
@@ -196,6 +199,8 @@ class Process(object):
             return True
         elif user_cmd == '2':
             module_name_l, modules_info = self.show(mutiple=False)
+            if not module_name_l:
+                return True
             new_name = input(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：')
             new_link = input(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：')
             new_system = input(f'将{module_name_l[0]}的所属系统信息修改为(不输入则不更改)：')
@@ -212,6 +217,8 @@ class Process(object):
             return True
         elif user_cmd == '3':
             modules_info = self.readJsonFile()
+            if not modules_info:
+                return True
             download_threads = []
             for k in modules_info:
                 module_name, module_link, system = k, modules_info[k].get('link'), modules_info[k].get('system')
@@ -224,11 +231,14 @@ class Process(object):
             for t in download_threads:
                 t.join()
                 
-            print('模块下载更新处理完成')
+            print(colorText('模块下载更新处理完成', 'green'))
             return True
         elif user_cmd == '4':
             module_name_l, modules_info = self.show()
             download_threads = []
+            if not module_name_l:
+                return True
+
             for name in module_name_l:
                 module_name, module_link, system = name, modules_info.get(name).get('link'), modules_info.get(name).get('system')
                 t = Thread(target=self.download_module, args=(module_name, module_link, system))
@@ -240,12 +250,14 @@ class Process(object):
             for t in download_threads:
                 t.join()
                 
-            print('模块下载更新处理完成')
+            print(colorText('模块下载更新处理完成', 'green'))
             return True
         elif user_cmd == '5':
             deleteinfocount = 0
             deletecount = 0
             module_name_l, modules_info = self.show()
+            if not module_name_l:
+                return True
             for name in module_name_l:
                 if modules_info.get(name):
                     modules_info.pop(name)
@@ -259,7 +271,7 @@ class Process(object):
                     deletecount += 1
             if deleteinfocount > 0:
                 self.saveJsonFile(modules_info)
-                print(f'共删除{deleteinfocount}个模块信息/{deletecount}个模块')
+                print(colorText(f'共删除{deleteinfocount}个模块信息/{deletecount}个模块', 'green'))
             return True
         elif user_cmd == '6':
             modules_info = self.readJsonFile()
@@ -287,17 +299,25 @@ def checkUpdate():
             if user_ans.lower() == 'y':
                 with open(__file__, 'w') as f:
                     f.write(res.text)
-                print('更新完成')
+                print(colorText('更新完成', 'green'))
                 return True
             else:
                 return False
         else:
             return False
     else:
-        print('无法获取最新版本')
+        print(colorText('无法获取最新版本', 'red'))
         return False
         
 
+def colorText(text, color_pick):
+    color_attr = getattr(Fore, color_pick.upper(), None)
+    if color_attr:
+        res = color_attr + text + Style.RESET_ALL
+    else:
+        res = text
+    
+    return res
 
 
 
@@ -307,7 +327,7 @@ def main():
     
     check_res = checkUpdate()
     if check_res:
-        print('请重新运行此脚本')
+        print(colorText('请重新运行此脚本', 'yellow'))
     else:
         surge = Process(BASE_DIR,module_dir)
         loop = True
@@ -317,7 +337,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
 

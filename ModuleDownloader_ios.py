@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240318
+# version:20240319
 
-__version__ = "20240318"
+__version__ = "20240319"
 
 
 import os
@@ -173,6 +173,8 @@ class Process(object):
     def show(self, mutiple=True):
         select_menu = {}
         modules_info = self.readJsonFile()
+        if not modules_info:
+            return None, None
         for idx, k in enumerate(modules_info):
             select_menu[f'{idx+1}'] = k
             print(f'{idx+1}. {k}')
@@ -200,6 +202,8 @@ class Process(object):
             return True
         elif user_cmd == '2':
             module_name_l, modules_info = self.show(mutiple=False)
+            if not module_name_l:
+                return True
             new_name = input(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：')
             new_link = input(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：')
             new_system = input(f'将{module_name_l[0]}的所属系统信息修改为(不输入则不更改)：')
@@ -216,6 +220,8 @@ class Process(object):
             return True
         elif user_cmd == '3':
             modules_info = self.readJsonFile()
+            if not modules_info:
+                return True
             download_threads = []
             for k in modules_info:
                 module_name, module_link, system = k, modules_info[k].get('link'), modules_info[k].get('system')
@@ -232,6 +238,8 @@ class Process(object):
             return True
         elif user_cmd == '4':
             module_name_l, modules_info = self.show()
+            if not module_name_l:
+                return True
             download_threads = []
             for name in module_name_l:
                 module_name, module_link, system = name, modules_info.get(name).get('link'), modules_info.get(name).get('system')
@@ -250,6 +258,8 @@ class Process(object):
             deleteinfocount = 0
             deletecount = 0
             module_name_l, modules_info = self.show()
+            if not module_name_l:
+                return True
             for name in module_name_l:
                 if modules_info.get(name):
                     modules_info.pop(name)
@@ -267,6 +277,8 @@ class Process(object):
             return True
         elif user_cmd == '6':
             modules_info = self.readJsonFile()
+            if not modules_info:
+                return True
             for idx, k in enumerate(modules_info):
                 if modules_info[k].get('system'):
                     if re.search('(?i)ios',modules_info[k].get('system')):
