@@ -8,7 +8,7 @@ import requests
 import re
 import json
 from threading import Thread
-from colorama import Fore, Style
+from colorama import Fore, Style, Back
 
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -83,7 +83,7 @@ class Process(object):
         count = 0
         loop = True
         while loop:
-            input_module_info = input('请输入模块名称和下载链接(以@分割:name@links[@sysinfo])')
+            input_module_info = input(colorText('请输入模块名称和下载链接(以@分割:name@links[@sysinfo])', 'cyan'))
             if input_module_info and '@' not in input_module_info:
                 print(colorText('格式输入错误', 'red'))
                 continue
@@ -163,7 +163,7 @@ class Process(object):
         print('6.查看当前模块信息')
         print('0.退出')
         
-        action = input('请输入操作:')
+        action = input(colorText('请输入操作:', 'cyan'))
         return action
 
 
@@ -177,12 +177,12 @@ class Process(object):
             print(f'{idx+1}. {k}')
         modules_name_l = []
         if mutiple:
-            selected_nums = input('请选择模块，多选以空格隔开：')
+            selected_nums = input(colorText('请选择模块，多选以空格隔开：', 'cyan'))
             selected_list = [i for i in selected_nums.split(' ') if i != '']
             for i in selected_list:
                 modules_name_l.append(select_menu.get(i))
         else:
-            selected_nums = input('请选择单个模块：')
+            selected_nums = input(colorText('请选择单个模块：', 'cyan'))
             modules_name_l.append(select_menu.get(selected_nums))
         
         return modules_name_l, modules_info
@@ -201,9 +201,9 @@ class Process(object):
             module_name_l, modules_info = self.show(mutiple=False)
             if not module_name_l:
                 return True
-            new_name = input(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：')
-            new_link = input(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：')
-            new_system = input(f'将{module_name_l[0]}的所属系统信息修改为(不输入则不更改)：')
+            new_name = input(colorText(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：', 'cyan'))
+            new_link = input(colorText(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：', 'cyan'))
+            new_system = input(colorText(f'将{module_name_l[0]}的所属系统信息修改为(不输入则不更改)：', 'cyan'))
             
             if new_link:
                 modules_info[module_name_l[0]]['link'] = new_link
@@ -283,7 +283,7 @@ class Process(object):
                         device = '🖥'
                 else:   
                     device = ''
-                print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device}')
+                print(Back.LIGHTYELLOW_EX + f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device}' + Style.RESET_ALL)
             return True
         else:
             return False
@@ -295,7 +295,7 @@ def checkUpdate():
     if res.status_code == 200 and 'text/plain' in res.headers.get('Content-Type'):
         new_version = re.search(r'#\s*version:(?P<version>\d+)', res.text).group("version")
         if new_version > __version__:
-            user_ans = input("检查到新版本，是否更新(y/n)? ")
+            user_ans = input(colorText("检查到新版本，是否更新(y/n)? ", 'cyan'))
             if user_ans.lower() == 'y':
                 with open(__file__, 'w') as f:
                     f.write(res.text)
