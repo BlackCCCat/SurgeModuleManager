@@ -294,7 +294,7 @@ class Process(object):
 
 
 def checkUpdate():
-    script_origin = "https://raw.githubusercontent.com/BlackCCCat/SurgeModuleManager/main/ModuleDownloader.py"
+    script_origin = "https://raw.githubusercontent.com/BlackCCCat/SurgeModuleManager/main/ModuleDownloader_ios.py"
     res = requests.get(url=script_origin, verify=False)
     if res.status_code == 200 and 'text/plain' in res.headers.get('Content-Type'):
         new_version = re.search(r'#\s*version:(?P<version>\d+)', res.text).group("version")
