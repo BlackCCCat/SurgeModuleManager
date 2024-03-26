@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240319
+# version:20240326
 
-__version__ = "20240319"
+__version__ = "20240326"
 
 import os
 import requests
@@ -199,7 +199,7 @@ class Process(object):
             return True
         elif user_cmd == '2':
             module_name_l, modules_info = self.show(mutiple=False)
-            if not module_name_l:
+            if not module_name_l[0]:
                 return True
             new_name = input(colorText(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：', 'cyan'))
             new_link = input(colorText(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：', 'cyan'))
