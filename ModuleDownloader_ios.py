@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240326
+# version:20240328
 
-__version__ = "20240326"
+__version__ = "20240328"
 
 
 import os
@@ -153,6 +153,16 @@ class Process(object):
             print(f'❌ Download {module_name} failed')
             return False
 
+    # 修改文件名
+    def modifyFilename(self, old_name, new_name):
+        modules_list = os.listdir(self.module_dir)
+        old_module_name, new_module_name = old_name + '.sgmodule', new_name + '.sgmodule'
+        if old_module_name in modules_list:
+            os.rename(os.path.join(self.module_dir, old_module_name), os.path.join(self.module_dir, new_module_name))
+            print(f'✅ 修改文件名 {old_name} 成功', 'green')
+        else:
+            pass
+
 
     def menu(self):
         """
@@ -214,6 +224,7 @@ class Process(object):
                 modules_info[module_name_l[0]]['system'] = new_link
             if new_name:
                 modules_info.update({new_name: modules_info.pop(module_name_l[0])})
+                self.modifyFilename(module_name_l[0], new_name)
             
             self.saveJsonFile(modules_info)
             print(f'已修改')
