@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240829
+# version:20240830
 
-__version__ = "20240829"
+__version__ = "20240830"
 
 
 import os
@@ -223,8 +223,9 @@ class Process(object):
         if not modules_info:
             return None, None
         for idx, k in enumerate(modules_info):
+            category = modules_info[k].get('category') or '-'
             select_menu[f'{idx+1}'] = k
-            print(f'{idx+1}. {k}')
+            print(f'{idx+1}. {k} [{category}]')
         modules_name_l = []
         if mutiple:
             selected_nums = input('请选择模块，多选以空格隔开：')
