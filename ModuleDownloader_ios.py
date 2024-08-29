@@ -346,7 +346,7 @@ class Process(object):
                 else:
                     category_info = ''
 
-                print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device} + {category_info}')
+                print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device} {category_info}')
             return True
         else:
             return False
