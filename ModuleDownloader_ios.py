@@ -223,7 +223,7 @@ class Process(object):
         if not modules_info:
             return None, None
         for idx, k in enumerate(modules_info):
-            category = modules_info[k].get('category') or '-'
+            category = modules_info[k].get('category', '-')
             select_menu[f'{idx+1}'] = k
             print(f'{idx+1}. {k} [{category}]')
         modules_name_l = []
