@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240328
+# version:20240829
 
-__version__ = "20240328"
+__version__ = "20240829"
 
 
 import os
@@ -104,7 +104,8 @@ class Process(object):
                 url_exists, name_exists = self.exists_links(add_module_name,add_module_link,modules_info)
                 if not url_exists:
                     if not name_exists:
-                        modules_info[add_module_name] = {'link':add_module_link,'system':add_module_sysinfo}
+                        add_category = self.selectCategory()
+                        modules_info[add_module_name] = {'link':add_module_link,'system':add_module_sysinfo,'category':add_category}
                         count += 1
                     else:
                         print('当前系统下名称重复')
@@ -118,7 +119,7 @@ class Process(object):
         print(f'共添加{count}个模块下载链接')
 
     # 下载
-    def download_module(self,module_name,module_link,system_info):
+    def download_module(self,module_name,module_link,system_info,module_category):
         res = requests.get(module_link,verify=False)
         if res.status_code == 200 and 'text/plain' in res.headers.get('Content-Type'):# 响应状态是成功并且内容是文本
             if '🔗' not in res.text:
@@ -137,13 +138,21 @@ class Process(object):
                 res_content = sysinfo + new_content
             else:
                 res_content = new_content
+            
+            if module_category:
+                if '#!category' in res_content:
+                    all_content = re.sub(r'(#!\s*category\s*=).*', f'#!category={module_category}\n', res_content)
+                else:
+                    all_content = f'#!category={module_category}\n' + res_content
+            else:
+                all_content = res_content
                 
 
             # 写入指定路径并以module_name命名
             file_name = module_name + '.sgmodule'
             whole_file_name = os.path.join(self.module_dir,file_name)
             with open(whole_file_name,'wb') as mf:
-                mf.write(res_content.encode())
+                mf.write(all_content.encode())
 
             print(f'✅ {module_name}(链接为:{module_link}) 已下载')
             return True
@@ -162,6 +171,34 @@ class Process(object):
             print(f'✅ 修改文件名 {old_name} 成功', 'green')
         else:
             pass
+
+
+    def selectCategory(self, type='add'):
+        """
+        获取分类信息，并选择一个分类，返回该分类名称
+        """
+        categories = []
+        modules_info = self.readJsonFile()
+
+        for item in modules_info.keys():
+            category_info = modules_info[item].get("category")
+            if category_info:
+                categories.append(category_info)
+
+        unique_categories = list(set(categories))
+
+        for idx, k in enumerate(unique_categories):
+            print(f'{idx+1}. {k}')
+
+        if type == 'add':
+            category = input('请输入分类序号或直接输入分类名称：')
+        else:
+            category = input('请输入要修改的分类序号或直接输入分类名称：')
+        try:
+            idx_num = int(category)
+            return unique_categories[idx_num-1]
+        except:
+            return category
 
 
     def menu(self):
@@ -217,11 +254,14 @@ class Process(object):
             new_name = input(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：')
             new_link = input(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：')
             new_system = input(f'将{module_name_l[0]}的所属系统信息修改为(不输入则不更改)：')
+            new_category = self.selectCategory(type='modify')
             
             if new_link:
                 modules_info[module_name_l[0]]['link'] = new_link
             if new_system:
                 modules_info[module_name_l[0]]['system'] = new_link
+            if new_category:
+                modules_info[module_name_l[0]]['category'] = new_category
             if new_name:
                 modules_info.update({new_name: modules_info.pop(module_name_l[0])})
                 self.modifyFilename(module_name_l[0], new_name)
@@ -235,8 +275,8 @@ class Process(object):
                 return True
             download_threads = []
             for k in modules_info:
-                module_name, module_link, system = k, modules_info[k].get('link'), modules_info[k].get('system')
-                t = Thread(target=self.download_module, args=(module_name, module_link, system))
+                module_name, module_link, system, category = k, modules_info[k].get('link'), modules_info[k].get('system'), modules_info[k].get('category')
+                t = Thread(target=self.download_module, args=(module_name, module_link, system, category))
                 download_threads.append(t)
             # 开始下载模块
             for t in download_threads:
@@ -253,8 +293,8 @@ class Process(object):
                 return True
             download_threads = []
             for name in module_name_l:
-                module_name, module_link, system = name, modules_info.get(name).get('link'), modules_info.get(name).get('system')
-                t = Thread(target=self.download_module, args=(module_name, module_link, system))
+                module_name, module_link, system, category = name, modules_info.get(name).get('link'), modules_info.get(name).get('system'), modules_info.get(name).get('category')
+                t = Thread(target=self.download_module, args=(module_name, module_link, system, category))
                 download_threads.append(t)
             # 开始下载模块
             for t in download_threads:
@@ -298,7 +338,14 @@ class Process(object):
                         device = '🖥'
                 else:   
                     device = ''
-                print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device}')
+                
+                category = modules_info[k].get('category')
+                if category:
+                    category_info = f' [{category}]'
+                else:
+                    category_info = ''
+
+                print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device} + {category_info}')
             return True
         else:
             return False
