@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240830
+# version:20240831
 
-__version__ = "20240830"
+__version__ = "20240831"
 
 
 import os
@@ -168,7 +168,7 @@ class Process(object):
         old_module_name, new_module_name = old_name + '.sgmodule', new_name + '.sgmodule'
         if old_module_name in modules_list:
             os.rename(os.path.join(self.module_dir, old_module_name), os.path.join(self.module_dir, new_module_name))
-            print(f'✅ 修改文件名 {old_name} 成功', 'green')
+            print(f'✅ 修改文件名 {old_name} 成功')
         else:
             pass
 
