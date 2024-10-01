@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20240830
+# version:20241001
 
-__version__ = "20240830"
+__version__ = "20241001"
 
 import os
 import requests
@@ -259,7 +259,7 @@ class Process(object):
             if new_link:
                 modules_info[module_name_l[0]]['link'] = new_link
             if new_system:
-                modules_info[module_name_l[0]]['system'] = new_link
+                modules_info[module_name_l[0]]['system'] = new_system
             if new_category:
                 modules_info[module_name_l[0]]['category'] = new_category
             if new_name:
