@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20241001
+# version:20241101
 
-__version__ = "20241001"
+__version__ = "20241101"
 
 import os
 import requests
@@ -103,6 +103,7 @@ class Process(object):
                     if not name_exists:
                         add_category = self.selectCategory()
                         modules_info[add_module_name] = {'link':add_module_link,'system':add_module_sysinfo,'category':add_category}
+                        self.download_module(add_module_name,add_module_link,add_module_sysinfo,add_category)
                         count += 1
                     else:
                         print(colorText('当前系统下名称重复', 'yellow'))
@@ -169,6 +170,14 @@ class Process(object):
             print(colorText(f'✅ 修改文件名 {old_name} 成功', 'green'))
         else:
             pass
+
+    # 删除模块文件
+    def delete_module(self, module_name):
+        file_name = module_name + '.sgmodule'
+        remove_module_dir = os.path.join(self.module_dir, file_name)
+        if os.path.exists(remove_module_dir):
+            os.remove(remove_module_dir)
+            return True
 
     def selectCategory(self, type='add'):
         """
@@ -262,7 +271,8 @@ class Process(object):
                 modules_info[module_name_l[0]]['system'] = new_system
             if new_category:
                 modules_info[module_name_l[0]]['category'] = new_category
-            if new_name:
+
+            if new_name and not (new_link or new_system or new_category):
                 modules_info.update({new_name: modules_info.pop(module_name_l[0])})
                 self.modifyFilename(module_name_l[0], new_name)
 

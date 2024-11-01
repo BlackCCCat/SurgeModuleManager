@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20241001
+# version:20241101
 
-__version__ = "20241001"
+__version__ = "20241101"
 
 
 import os
@@ -106,6 +106,7 @@ class Process(object):
                     if not name_exists:
                         add_category = self.selectCategory()
                         modules_info[add_module_name] = {'link':add_module_link,'system':add_module_sysinfo,'category':add_category}
+                        self.download_module(add_module_name,add_module_link,add_module_sysinfo,add_category)
                         count += 1
                     else:
                         print('当前系统下名称重复')
@@ -116,7 +117,7 @@ class Process(object):
 
         self.saveJsonFile(modules_info)
 
-        print(f'共添加{count}个模块下载链接')
+        print(f'共添加并下载{count}个模块')
 
     # 下载
     def download_module(self,module_name,module_link,system_info,module_category):
@@ -171,6 +172,14 @@ class Process(object):
             print(f'✅ 修改文件名 {old_name} 成功')
         else:
             pass
+
+    # 删除模块文件
+    def delete_module(self, module_name):
+        file_name = module_name + '.sgmodule'
+        remove_module_dir = os.path.join(self.module_dir, file_name)
+        if os.path.exists(remove_module_dir):
+            os.remove(remove_module_dir)
+            return True
 
 
     def selectCategory(self, type='add'):
@@ -263,10 +272,12 @@ class Process(object):
                 modules_info[module_name_l[0]]['system'] = new_system
             if new_category:
                 modules_info[module_name_l[0]]['category'] = new_category
+
             if new_name:
                 modules_info.update({new_name: modules_info.pop(module_name_l[0])})
                 self.modifyFilename(module_name_l[0], new_name)
-            
+
+
             self.saveJsonFile(modules_info)
             print(f'已修改')
             return True
@@ -318,10 +329,8 @@ class Process(object):
                     
                     deleteinfocount += 1
                 
-                file_name = name + '.sgmodule'
-                remove_module_dir = os.path.join(self.module_dir, file_name)
-                if os.path.exists(remove_module_dir):
-                    os.remove(remove_module_dir)
+                res = self.delete_module(name)
+                if res:
                     deletecount += 1
             if deleteinfocount > 0:
                 self.saveJsonFile(modules_info)
