@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20241101
+# version:20241103
 
-__version__ = "20241101"
+__version__ = "20241103"
 
 import os
 import requests
@@ -104,6 +104,7 @@ class Process(object):
                         add_category = self.selectCategory()
                         modules_info[add_module_name] = {'link':add_module_link,'system':add_module_sysinfo,'category':add_category}
                         self.download_module(add_module_name,add_module_link,add_module_sysinfo,add_category)
+                        self.saveJsonFile(modules_info)
                         count += 1
                     else:
                         print(colorText('当前系统下名称重复', 'yellow'))
@@ -112,9 +113,6 @@ class Process(object):
             else:
                 loop = False
         
-
-        self.saveJsonFile(modules_info)
-
         print(colorText(f'共添加{count}个模块下载链接', 'blue'))
 
     # 下载
