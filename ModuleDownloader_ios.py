@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20241103
+# version:20241104
 
-__version__ = "20241103"
+__version__ = "20241104"
 
 
 import os
@@ -121,7 +121,7 @@ class Process(object):
     # 下载
     def download_module(self,module_name,module_link,system_info,module_category):
         res = requests.get(module_link,verify=False)
-        if res.status_code == 200 and 'text/plain' in res.headers.get('Content-Type'):# 响应状态是成功并且内容是文本
+        if res.status_code == 200 and ('text/plain' in res.headers.get('Content-Type') or 'application/octet-stream' in res.headers.get('Content-Type')):
             if '🔗' not in res.text:
                 # modify the content
                 new_content = re.sub(r'#!\s*name\s*=', '#!name=🔗', res.text)
