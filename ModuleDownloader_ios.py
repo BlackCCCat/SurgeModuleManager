@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20241104
+# version:20250102
 
-__version__ = "20241104"
+__version__ = "20250102"
 
 
 import os
@@ -200,6 +200,10 @@ class Process(object):
 
         if type == 'add':
             category = input('请输入分类序号或直接输入分类名称：')
+        elif type == 'download':
+            category = input('请输入要下载的指定分类：')
+        elif type == 'check':
+            category = input('请输入要查看的指定分类：')
         else:
             category = input('请输入要修改的分类序号或直接输入分类名称：')
         try:
@@ -216,9 +220,11 @@ class Process(object):
         print('1.添加模块')
         print('2.修改模块')
         print('3.下载更新全部模块')
-        print('4.下载更新指定模块')
-        print('5.删除模块')
-        print('6.查看当前模块信息')
+        print('4 下载更新指定分类的全部模块')
+        print('5.下载更新指定模块')
+        print('6.删除模块')
+        print('7.查看当前所有模块信息')
+        print('8.查看指定分类的模块信息')
         print('0.退出')
         
         action = input('请输入操作:')
@@ -245,8 +251,51 @@ class Process(object):
             modules_name_l.append(select_menu.get(selected_nums))
         
         return modules_name_l, modules_info
+    
+    # 查看模块信息
+    def showAll(self, target_category=None):
+        modules_info = self.readJsonFile()
+        if not modules_info:
+            return True
+        for idx, k in enumerate(modules_info):
+            if modules_info[k].get('system'):
+                if re.search('(?i)ios',modules_info[k].get('system')):
+                    device = '📱'
+                if re.search('(?i)mac',modules_info[k].get('system')):
+                    device = '🖥'
+            else:   
+                device = ''
+                
+            category = modules_info[k].get('category')
+            if category:
+                category_info = f' [{category}]'
+            else:
+                category_info = ''
 
+            if target_category and target_category != category:
+                continue
+            print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device} {category_info}')
 
+    # 遍历下载
+    def threadDownload(self, target_category=None):
+        modules_info = self.readJsonFile()
+        if not modules_info:
+            return True
+        download_threads = []
+        for k in modules_info:
+            module_name, module_link, system, category = k, modules_info[k].get('link'), modules_info[k].get('system'), modules_info[k].get('category')
+            t = Thread(target=self.download_module, args=(module_name, module_link, system, category))
+            if target_category and target_category != category:
+                continue
+            download_threads.append(t)
+        # 开始下载模块
+        for t in download_threads:
+            t.start()
+        # 确保所有线程都下载完成以后再做文件处理
+        for t in download_threads:
+            t.join()
+                
+        print('模块下载更新处理完成')
 
 
     # 运行
@@ -262,12 +311,14 @@ class Process(object):
                 return True
             new_name = input(f'将{module_name_l[0]}的名称修改为(不输入则不更改)：')
             new_link = input(f'将{module_name_l[0]}的链接修改为(不输入则不更改)：')
-            new_system = input(f'将{module_name_l[0]}的所属系统信息修改为(不输入则不更改)：')
+            new_system = input(f'将{module_name_l[0]}的所属系统信息修改为(1为保持不变，0为移除系统信息，直接输入为更改信息)：')
             new_category = self.selectCategory(type='modify')
             
             if new_link:
                 modules_info[module_name_l[0]]['link'] = new_link
-            if new_system:
+            if new_system == '0':
+                modules_info[module_name_l[0]]['system'] = ''
+            elif new_system and new_system != '1':
                 modules_info[module_name_l[0]]['system'] = new_system
             if new_category:
                 modules_info[module_name_l[0]]['category'] = new_category
@@ -281,24 +332,13 @@ class Process(object):
             print(f'已修改')
             return True
         elif user_cmd == '3':
-            modules_info = self.readJsonFile()
-            if not modules_info:
-                return True
-            download_threads = []
-            for k in modules_info:
-                module_name, module_link, system, category = k, modules_info[k].get('link'), modules_info[k].get('system'), modules_info[k].get('category')
-                t = Thread(target=self.download_module, args=(module_name, module_link, system, category))
-                download_threads.append(t)
-            # 开始下载模块
-            for t in download_threads:
-                t.start()
-            # 确保所有线程都下载完成以后再做文件处理
-            for t in download_threads:
-                t.join()
-                
-            print('模块下载更新处理完成')
+            self.threadDownload()
             return True
         elif user_cmd == '4':
+            selected_cat = self.selectCategory(type='download')
+            self.threadDownload(target_category=selected_cat)
+            return True
+        elif user_cmd == '5':
             module_name_l, modules_info = self.show()
             if not module_name_l:
                 return True
@@ -316,7 +356,7 @@ class Process(object):
                 
             print('模块下载更新处理完成')
             return True
-        elif user_cmd == '5':
+        elif user_cmd == '6':
             deleteinfocount = 0
             deletecount = 0
             module_name_l, modules_info = self.show()
@@ -335,26 +375,12 @@ class Process(object):
                 self.saveJsonFile(modules_info)
                 print(f'共删除{deleteinfocount}个模块信息/{deletecount}个模块')
             return True
-        elif user_cmd == '6':
-            modules_info = self.readJsonFile()
-            if not modules_info:
-                return True
-            for idx, k in enumerate(modules_info):
-                if modules_info[k].get('system'):
-                    if re.search('(?i)ios',modules_info[k].get('system')):
-                        device = '📱'
-                    if re.search('(?i)mac',modules_info[k].get('system')):
-                        device = '🖥'
-                else:   
-                    device = ''
-                
-                category = modules_info[k].get('category')
-                if category:
-                    category_info = f' [{category}]'
-                else:
-                    category_info = ''
-
-                print(f'{idx+1}. {k} 🔗:{modules_info[k]["link"]} {device} {category_info}')
+        elif user_cmd == '7':
+            self.showAll()
+            return True
+        elif user_cmd == '8':
+            selected_cat = self.selectCategory(type='check')
+            self.showAll(selected_cat)
             return True
         else:
             return False
