@@ -119,9 +119,9 @@ class Process(object):
                 new_content = re.sub(r'#!\s*name\s*=', '#!name=🔗', res.text)
                 
             if system_info:
-                if re.search('(?i)ios',system_info):
+                if re.search('(?i)ios[^&]',system_info):
                     sysinfo = '#!system=ios\n'
-                elif re.match('(?i)mac',system_info):
+                elif re.match('(?i)mac[^&]',system_info):
                     sysinfo = '#!system=mac\n'
             else:
                 sysinfo = ''
