@@ -7,8 +7,6 @@ import os
 import requests
 import re
 import json
-from threading import Thread
-from colorama import Fore, Style, Back
 
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
