@@ -12,6 +12,9 @@
 选择添加模块时，需注意格式为`name@links[@sysinfo]`，`[@sysinfo]`为可选内容，即系统信息，分为`iOS`和`Mac`两种值，不区分大小写
 
 # 全新的UI界面（pyqt实现）
+![CleanShot 2025-04-03 at 13.10.41@2x](assets/CleanShot%202025-04-03%20at%2013.10.41@2x.png)
+![CleanShot 2025-04-03 at 13.10.48@2x](assets/CleanShot%202025-04-03%20at%2013.10.48@2x.png)
+
 
 [DownloaderUI](https://github.com/BlackCCCat/SurgeModuleManager/tree/main/DownloadUI)
 - `config.toml` 填写路径，也可以在界面中选择，如果不填写配置也不选择路径，则在该主程序脚本相通路径下生成
