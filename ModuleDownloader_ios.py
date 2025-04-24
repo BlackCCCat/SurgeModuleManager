@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20250423
+# version:20250424
 
-__version__ = "20250423"
+__version__ = "20250424"
 
 
 import os
@@ -9,6 +9,7 @@ import requests
 import re
 import json
 from threading import Thread
+from typing import List, Dict
 
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -29,7 +30,10 @@ class Process(object):
         self.module_dir = module_dir
         self.check()
         
-    def check(self):
+    def check(self) -> None:
+        """
+        检查模块信息文件和模块存储路径是否存在，不存在则创建
+        """
         if not os.path.isfile(self.module_info_dir):
             with open(self.module_info_dir, 'wb') as f:
                 f.write(''.encode())
@@ -38,7 +42,7 @@ class Process(object):
             os.makedirs(self.module_dir)
 
 
-    def readJsonFile(self):
+    def readJsonFile(self) -> List[Dict[str, str]]:
         """
         读取modules.json
         """
@@ -52,7 +56,7 @@ class Process(object):
             modules = []
         return modules
         
-    def saveJsonFile(self, modules_info):
+    def saveJsonFile(self, modules_info: List[Dict[str, str]]) -> None:
         """
         保存到modules.json
         """
@@ -83,6 +87,9 @@ class Process(object):
 
     # 添加模块及下载链接
     def add_links(self):
+        """
+        添加模块及下载链接等信息
+        """
         modules_info = self.readJsonFile()
         count = 0
         loop = True
@@ -121,6 +128,13 @@ class Process(object):
 
     # 下载
     def download_module(self,module_name,module_link,system_info,module_category):
+        """
+        下载
+        :param module_name: 模块名称
+        :param module_link: 模块下载链接
+        :param system_info: 系统信息
+        :param module_category: 模块分类
+        """
         res = requests.get(module_link,verify=False)
         if res.status_code == 200 and ('text/plain' in res.headers.get('Content-Type') or 'application/octet-stream' in res.headers.get('Content-Type')):
             if '🔗' not in res.text:
@@ -165,6 +179,9 @@ class Process(object):
 
     # 修改文件名
     def modifyFilename(self, old_name, new_name):
+        """
+        修改文件名
+        """
         modules_list = os.listdir(self.module_dir)
         old_module_name, new_module_name = old_name + '.sgmodule', new_name + '.sgmodule'
         if old_module_name in modules_list:
@@ -174,7 +191,10 @@ class Process(object):
             pass
 
     # 删除模块文件
-    def delete_module(self, module_name):
+    def delete_module(self, module_name) -> bool:
+        """
+        删除模块文件
+        """
         file_name = module_name + '.sgmodule'
         remove_module_dir = os.path.join(self.module_dir, file_name)
         if os.path.exists(remove_module_dir):
