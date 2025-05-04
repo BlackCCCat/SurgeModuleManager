@@ -128,8 +128,8 @@ class Process(object):
                     sysinfo = '#!system=ios\n'
                 elif re.match('(?<!ios&)macos',system_info,re.IGNORECASE):
                     sysinfo = '#!system=mac\n'
-            else:
-                sysinfo = ''
+                else:
+                    sysinfo = ''
             
             if '#!system' not in new_content:
                 res_content = sysinfo + new_content
