@@ -7,7 +7,7 @@ import os
 import requests
 import re
 import json
-
+from threading import Thread, Lock
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -19,6 +19,7 @@ requests.packages.urllib3.disable_warnings()
 
 import urllib3
 urllib3.disable_warnings()
+
 
 class Process(object):    
     def __init__(self, module_info_dir, module_dir):
@@ -32,8 +33,8 @@ class Process(object):
         检查模块信息文件和模块存储路径是否存在，不存在则创建
         """
         if not os.path.isfile(self.module_info_dir):
-            with open(self.module_info_dir, 'w') as f:
-                f.write('')
+            with open(self.module_info_dir, 'wb') as f:
+                f.write(''.encode())
         
         if not os.path.isdir(self.module_dir):
             os.makedirs(self.module_dir)
@@ -42,8 +43,8 @@ class Process(object):
         """
         读取modules.json
         """
-        with open(self.module_info_dir, 'r') as f:
-            content = f.read()
+        with open(self.module_info_dir, 'rb') as f:
+            content = f.read().decode()
 
         try:
             modules = json.loads(content)
@@ -56,7 +57,7 @@ class Process(object):
         保存到modules.json
         """
         modules_info_str = json.dumps(modules_info, ensure_ascii=False, indent=4)
-        with open(self.module_info_dir, 'w') as f:
+        with open(self.module_info_dir, 'wb') as f:
             f.write(modules_info_str)
             # json.dump(modules_info, f, ensure_ascii=False, indent=4)
     
@@ -103,14 +104,17 @@ class Process(object):
         return False
          
     # 下载
-    def download_module(self, module: dict):
+    def download_module(self, module: dict, result: dict, lock: Lock):
         module_name, module_link, system_info, module_category = module["name"], module["link"], module["system"], module["category"]
         try:
             res = requests.get(module_link,verify=False)
-        except:
-            res = None
-        if not res:
-            return False
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading module {module_name}: {e}")
+            # 记录失败结果
+            with lock:
+                result[module_name] = False
+            return
+            
         if res.status_code == 200 and ('text/plain' in res.headers.get('Content-Type') or 'application/octet-stream' in res.headers.get('Content-Type')):
             if '🔗' not in res.text:
                 # modify the content
@@ -119,10 +123,10 @@ class Process(object):
             if system_info:
                 if re.search('ios(?!&macos)',system_info,re.IGNORECASE):
                     sysinfo = '#!system=ios\n'
-                elif re.match('(?<!ios&)macos',system_info,re.IGNORECASE):
+                elif re.search('(?<!ios&)macos',system_info,re.IGNORECASE):
                     sysinfo = '#!system=mac\n'
-            else:
-                sysinfo = ''
+                else:
+                    sysinfo = ''
             
             if '#!system' not in new_content:
                 res_content = sysinfo + new_content
@@ -141,11 +145,45 @@ class Process(object):
             # 写入指定路径并以module_name命名
             file_name = module_name + '.sgmodule'
             whole_file_name = os.path.join(self.module_dir,file_name)
-            with open(whole_file_name,'w') as mf:
-                mf.write(all_content)
+            try:
+                with open(whole_file_name,'wb') as mf:
+                    mf.write(all_content.encode())
+                with lock:
+                    result[module_name] = True
+            except IOError as e:
+                print(f"Error writing module {module_name}: {e}")
+                # 记录失败结果
+                with lock:
+                    result[module_name] = False
+        else:
+            print(f"Invalid response for module {module_name}")
+            with lock:
+                result[module_name] = False
 
-            return True
-        return False
+    
+    def threadDownload(self, modules:list):
+
+        download_threads = []
+        result = {}  # 用来存储每个模块的下载状态
+        lock = Lock()  # 防止线程竞争导致结果记录错误
+        for module in modules:
+            t = Thread(target=self.download_module, args=(module, result, lock))
+            download_threads.append(t)
+        # 开始下载模块
+        for t in download_threads:
+            t.start()
+        # 确保所有线程都下载完成以后再做文件处理
+        for t in download_threads:
+            t.join()
+        
+        print('模块下载更新处理完成')
+        # 检查结果
+        if all(result.values()):
+            return True  # 全部成功
+        else:
+            failed_modules = [name for name, status in result.items() if not status]
+            print(f"以下模块下载失败: {', '.join(failed_modules)}")
+            return False
         
     # 修改文件名
     def modifyFilename(self, old_name, new_name):

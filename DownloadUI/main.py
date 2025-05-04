@@ -340,7 +340,7 @@ class ModuleManagerApp(QMainWindow):
             self.populate_module_table()
 
     def batch_update_modules(self):
-        selected_rows = [item.row() for item in self.module_table.selectedItems()]
+        selected_rows = set([item.row() for item in self.module_table.selectedItems()])
         if not selected_rows:
             QMessageBox.warning(self, "批量更新", "请选择要更新的模块。")
             return
@@ -348,11 +348,13 @@ class ModuleManagerApp(QMainWindow):
         module_names_to_update = [self.module_data[row]['name'] for row in selected_rows]
         print(f"批量更新模块: {module_names_to_update}")
         failed_res = []
+        modules = []
         for row_index in selected_rows:
             module = self.module_data[row_index]
-            update_res = self.process.download_module(module)
-            if not update_res:
-                failed_res.append(module["name"])
+            modules.append(module)
+        update_res = self.process.threadDownload(modules)
+        if not update_res:
+            failed_res.append(module["name"])
         if failed_res:
             QMessageBox.warning(self, "批量更新", f"以下模块更新失败: {', '.join(failed_res)}")
         else:
