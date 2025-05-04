@@ -282,9 +282,11 @@ class Process(object):
             if module.get('system'):
                 if re.search('ios(?!&macos)', module.get('system'), re.IGNORECASE):
                     device = '📱'
-                if re.search('(?<!ios&)macos', module.get('system'), re.IGNORECASE):
+                elif re.search('(?<!ios&)macos', module.get('system'), re.IGNORECASE):
                     device = '🖥'
-            else:   
+                else:
+                    device = ''
+            else:
                 device = ''
                 
             category = module.get('category')
