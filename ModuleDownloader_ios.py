@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20250424
+# version:20250504
 
-__version__ = "20250424"
+__version__ = "20250504"
 
 
 import os
@@ -280,9 +280,9 @@ class Process(object):
             return True
         for idx, module in enumerate(modules_info):
             if module.get('system'):
-                if re.search('(?i)ios',module.get('system')):
+                if re.search('ios(?!&macos)', module.get('system'), re.IGNORECASE):
                     device = '📱'
-                if re.search('(?i)mac',module.get('system')):
+                if re.search('(?<!ios&)macos', module.get('system'), re.IGNORECASE):
                     device = '🖥'
             else:   
                 device = ''

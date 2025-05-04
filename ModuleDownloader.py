@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20250423
+# version:20250504
 
-__version__ = "20250423"
+__version__ = "20250504"
 
 import os
 import requests
@@ -124,9 +124,9 @@ class Process(object):
                 new_content = re.sub(r'#!\s*name\s*=', '#!name=🔗', res.text)
                 
             if system_info:
-                if re.search('(?i)ios',system_info):
+                if re.search('ios(?!&macos)',system_info,re.IGNORECASE):
                     sysinfo = '#!system=ios\n'
-                elif re.match('(?i)mac',system_info):
+                elif re.match('(?<!ios&)macos',system_info,re.IGNORECASE):
                     sysinfo = '#!system=mac\n'
             else:
                 sysinfo = ''
