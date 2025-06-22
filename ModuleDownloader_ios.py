@@ -173,6 +173,7 @@ class Process(object):
             return True
         elif res.status_code == 404:
             print(f'🈳 {module_name}(链接为:{module_link}) 不存在,请检查GitHub地址是否正确')
+            return False
         else:
             print(f'❌ Download {module_name} failed')
             return False
