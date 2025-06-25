@@ -2,6 +2,7 @@ import sys
 import os
 import toml
 import json  # 导入 json 模块
+import subprocess
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTableWidget, QTableWidgetItem, QPushButton, QLineEdit, QLabel,
@@ -305,12 +306,13 @@ class ModuleManagerApp(QMainWindow):
 
         if module_path and os.path.exists(module_path):
             try:
-                with open(module_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                dialog = QMessageBox()
-                dialog.setWindowTitle(f"模块内容: {module_name}")
-                dialog.setText(content)
-                dialog.exec()
+                # with open(module_path, 'r', encoding='utf-8') as f:
+                    # content = f.read()
+                subprocess.run(['open', module_path]) # 使用默认应用打开文件
+                # dialog = QMessageBox()
+                # dialog.setWindowTitle(f"模块内容: {module_name}")
+                # dialog.setText(content)
+                # dialog.exec()
             except FileNotFoundError:
                 QMessageBox.warning(self, "查看内容", f"模块 '{module_name}' 的文件未找到。")
             except Exception as e:
