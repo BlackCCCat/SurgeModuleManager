@@ -10,6 +10,7 @@ import re
 import json
 from threading import Thread
 from typing import List, Dict
+from colorama import Fore, Style
 
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -22,6 +23,22 @@ requests.packages.urllib3.disable_warnings()
 
 import urllib3
 urllib3.disable_warnings()
+
+
+def print_warning(text):
+    print(Fore.YELLOW + text + Style.RESET_ALL)
+
+def print_error(text):
+    print(Fore.RED + text + Style.RESET_ALL)
+
+def print_success(text):
+    print(Fore.GREEN + text + Style.RESET_ALL)
+
+def print_info(text):
+    print(Fore.BLUE + text + Style.RESET_ALL)
+
+def print_menu(text):
+    print(Fore.CYAN + text + Style.RESET_ALL)
 
 class Process(object):
     
@@ -52,7 +69,7 @@ class Process(object):
         try:
             modules = json.loads(content)
         except:
-            print('当前无模块信息')
+            print_warning('当前无模块信息')
             modules = []
         return modules
         
@@ -118,13 +135,13 @@ class Process(object):
                         self.saveJsonFile(modules_info)
                         count += 1
                     else:
-                        print('当前系统下名称重复')
+                        print_warning('当前系统下名称重复')
                 else:
-                    print('链接已存在')
+                    print_warning('链接已存在')
             else:
                 loop = False
 
-        print(f'共添加并下载{count}个模块')
+        print_success(f'共添加并下载{count}个模块')
 
     # 下载
     def download_module(self,module_name,module_link,system_info,module_category):
@@ -169,13 +186,13 @@ class Process(object):
             with open(whole_file_name,'wb') as mf:
                 mf.write(all_content.encode())
 
-            print(f'✅ {module_name}(链接为:{module_link}) 已下载')
+            print_success(f'✅ {module_name}(链接为:{module_link}) 已下载')
             return True
         elif res.status_code == 404:
-            print(f'🈳 {module_name}(链接为:{module_link}) 不存在,请检查GitHub地址是否正确')
+            print_error(f'🈳 {module_name}(链接为:{module_link}) 不存在,请检查GitHub地址是否正确')
             return False
         else:
-            print(f'❌ Download {module_name} failed')
+            print_error(f'❌ Download {module_name} failed')
             return False
 
     # 修改文件名
@@ -187,7 +204,7 @@ class Process(object):
         old_module_name, new_module_name = old_name + '.sgmodule', new_name + '.sgmodule'
         if old_module_name in modules_list:
             os.rename(os.path.join(self.module_dir, old_module_name), os.path.join(self.module_dir, new_module_name))
-            print(f'✅ 修改文件名 {old_name} 成功')
+            print_success(f'✅ 修改文件名 {old_name} 成功')
         else:
             pass
 
@@ -218,7 +235,7 @@ class Process(object):
         unique_categories = list(set(categories))
 
         for idx, k in enumerate(unique_categories):
-            print(f'{idx+1}. {k}')
+            print_info(f'{idx+1}. {k}')
 
         if type == 'add':
             category = input('请输入分类序号或直接输入分类名称：')
@@ -239,15 +256,15 @@ class Process(object):
         """
         菜单
         """
-        print('1.添加模块')
-        print('2.修改模块')
-        print('3.下载更新全部模块')
-        print('4 下载更新指定分类的全部模块')
-        print('5.下载更新指定模块')
-        print('6.删除模块')
-        print('7.查看当前所有模块信息')
-        print('8.查看指定分类的模块信息')
-        print('0.退出')
+        print_menu('1.添加模块')
+        print_menu('2.修改模块')
+        print_menu('3.下载更新全部模块')
+        print_menu('4 下载更新指定分类的全部模块')
+        print_menu('5.下载更新指定模块')
+        print_menu('6.删除模块')
+        print_menu('7.查看当前所有模块信息')
+        print_menu('8.查看指定分类的模块信息')
+        print_menu('0.退出')
         
         action = input('请输入操作:')
         return action
@@ -261,7 +278,7 @@ class Process(object):
         for idx, module in enumerate(modules_info):
             category = module.get('category','-')
             select_menu[f'{idx+1}'] = module
-            print(f'{idx+1}. {module.get("name")} [{category}]')
+            print_info(f'{idx+1}. {module.get("name")} [{category}]')
         modules_name_l = []
         if mutiple:
             selected_nums = input('请选择模块，多选以空格隔开：')
@@ -298,7 +315,7 @@ class Process(object):
 
             if target_category and target_category != category:
                 continue
-            print(f'{idx+1}. {module["name"]} 🔗:{module["link"]} {device} {category_info}')
+            print_info(f'{idx+1}. {module["name"]} 🔗:{module["link"]} {device} {category_info}')
 
     # 遍历下载
     def threadDownload(self, target_category=None):
@@ -319,7 +336,7 @@ class Process(object):
         for t in download_threads:
             t.join()
                 
-        print('模块下载更新处理完成')
+        print_success('模块下载更新处理完成')
 
 
     # 运行
@@ -354,7 +371,7 @@ class Process(object):
 
 
             self.saveJsonFile(modules_info)
-            print(f'已修改')
+            print_success(f'已修改')
             return True
         elif user_cmd == '3':
             self.threadDownload()
@@ -381,7 +398,7 @@ class Process(object):
             for t in download_threads:
                 t.join()
                 
-            print('模块下载更新处理完成')
+            print_success('模块下载更新处理完成')
             return True
         elif user_cmd == '6':
             deleteinfocount = 0
@@ -399,7 +416,7 @@ class Process(object):
                     deletecount += 1
             if deleteinfocount > 0:
                 self.saveJsonFile(modules_info)
-                print(f'共删除{deleteinfocount}个模块信息/{deletecount}个模块')
+                print_success(f'共删除{deleteinfocount}个模块信息/{deletecount}个模块')
             return True
         elif user_cmd == '7':
             self.showAll()
@@ -422,14 +439,14 @@ def checkUpdate():
             if user_ans.lower() == 'y':
                 with open(__file__, 'wb') as f:
                     f.write(res.text.encode())
-                print('更新完成')
+                print_success('更新完成')
                 return True
             else:
                 return False
         else:
             return False
     else:
-        print('无法获取最新版本')
+        print_error('无法获取最新版本')
         return False
 
 
@@ -440,7 +457,7 @@ def main():
     
     check_res = checkUpdate()
     if check_res:
-        print('请重新运行此脚本')
+        print_warning('请重新运行此脚本')
     else:
         surge = Process(BASE_DIR,module_dir)
         loop = True
