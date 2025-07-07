@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20250504
+# version:20250707
 
-__version__ = "20250504"
+__version__ = "20250707"
 
 
 import os
