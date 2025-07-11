@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-# version:20250504
+# version:20250712
 
-__version__ = "20250504"
+__version__ = "20250712"
 
 import os
 import requests
 import re
 import json
 from threading import Thread
-from colorama import Fore, Style, Back
+from colorama import Fore, Style
 
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
@@ -274,7 +274,7 @@ class Process(object):
             if target_category and target_category != category:
                 continue
 
-            print(Back.LIGHTYELLOW_EX + f'{idx+1}. {module["name"]} 🔗:{module["link"]} {device}' + category_info + Style.RESET_ALL)
+            print(Fore.LIGHTYELLOW_EX + f'{idx+1}. {module["name"]} 🔗:{module["link"]} {device}' + category_info + Style.RESET_ALL)
 
 
     # 遍历下载
