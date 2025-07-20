@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# version:20250707
+# version:20250720
 
-__version__ = "20250707"
+__version__ = "20250720"
 
 
 import os
@@ -165,6 +165,8 @@ class Process(object):
                     sysinfo = '#!system=mac\n'
                 else:
                     sysinfo = ''
+            else:
+                sysinfo = ''
             
             if '#!system' not in new_content:
                 res_content = sysinfo + new_content
